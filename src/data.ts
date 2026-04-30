@@ -28,7 +28,7 @@ export interface Experience {
 export const EDUCATION: Education[] = [
   {
     id: "edu-msc",
-    degree: "M.Sc. Data Science",
+    degree: "Data Science",
     institution: "University of Mannheim",
     period: "Current",
     grade: "1.5",
@@ -36,7 +36,7 @@ export const EDUCATION: Education[] = [
   },
   {
     id: "edu-bsc",
-    degree: "B.Sc. Computer Science",
+    degree: "Computer Science",
     institution: "Technische Hochschule Mannheim",
     period: "Completed",
     grade: "1.3",

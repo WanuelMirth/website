@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'motion/react';
+import { motion, type Variants } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -45,11 +45,23 @@ export const NetworkNode: React.FC<NetworkNodeProps> = ({
     }
   }, [id, onPositionUpdate]);
 
-  const variants = {
+  const variants: Variants = {
     initial: { scale: 0, opacity: 0 },
-    animate: { scale: 1, opacity: 1 },
-    hover: { scale: 1.1, cursor: 'pointer' },
-    active: { scale: 1.1, borderColor: '#3b82f6', color: '#3b82f6' }
+    animate: { 
+      scale: 1, 
+      opacity: 1,
+      transition: { duration: 0.3 }
+    },
+    active: {
+      scale: 1.1,
+      opacity: 1,
+      transition: { duration: 0.3 }
+    },
+    hover: { 
+      scale: 1.15, 
+      cursor: 'pointer',
+      transition: { duration: 0.1, ease: "circOut" }
+    }
   };
 
   const typeConfig = {
@@ -62,20 +74,20 @@ export const NetworkNode: React.FC<NetworkNodeProps> = ({
     <motion.div
       ref={nodeRef}
       initial="initial"
-      animate="animate"
+      animate={isActive ? "active" : "animate"}
       whileHover="hover"
       variants={variants}
       onClick={onClick}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       className={cn(
-        "relative flex flex-col items-center justify-center w-24 h-24 rounded-full border-2 glass transition-colors duration-300",
+        "relative flex flex-col items-center justify-center w-[110px] h-[110px] rounded-full border-2 glass",
         typeConfig[type],
-        isActive && "shadow-[0_0_20px_rgba(59,130,246,0.6)] border-white text-white",
+        isActive && "shadow-[0_0_30px_rgba(59,130,246,0.4)] border-white text-white",
         className
       )}
     >
-      <div className="text-xs font-bold text-center px-1 truncate w-full">
+      <div className="text-[10px] md:text-xs font-bold text-center px-1 truncate w-full">
         {label}
       </div>
     </motion.div>

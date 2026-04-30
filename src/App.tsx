@@ -16,11 +16,9 @@ import {
   GraduationCap,
   Briefcase,
   Terminal,
-  Trophy
+  Trophy,
+  X
 } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
 import { NetworkNode } from './components/NetworkNode';
 import { Connection } from './components/Connection';
 import { PROJECTS, EDUCATION, EXPERIENCE, type Project, type Education, type Experience } from './data';
@@ -32,44 +30,104 @@ export default function App() {
   const [selectedItem, setSelectedItem] = useState<DetailItem | null>(null);
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
   const [nodePositions, setNodePositions] = useState<Record<string, { x: number, y: number }>>({});
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
   
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const updateNodePosition = (id: string, rect: DOMRect) => {
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Calculate offsets relative to viewport width
+  // This ensures the straight segment clears the side text block accurately
+  const sideTextOffset = windowWidth < 768 
+    ? 220 // Static minimum for mobile
+    : Math.max((windowWidth / 1920) * 450, 300); // Scaled for desktop with a floor
+
+  const updateNodePosition = React.useCallback((id: string, rect: DOMRect) => {
     if (!contentRef.current) return;
     const contentRect = contentRef.current.getBoundingClientRect();
     
-    setNodePositions(prev => ({
-      ...prev,
-      [id]: {
-        x: rect.left - contentRect.left + rect.width / 2,
-        y: rect.top - contentRect.top + rect.height / 2
+    setNodePositions(prev => {
+      const newX = rect.left - contentRect.left + rect.width / 2;
+      const newY = rect.top - contentRect.top + rect.height / 2;
+      
+      // Only update if position actually changed significantly (avoid micro-jitters)
+      const current = prev[id];
+      if (current && Math.abs(current.x - newX) < 0.1 && Math.abs(current.y - newY) < 0.1) {
+        return prev;
       }
-    }));
-  };
+
+      return {
+        ...prev,
+        [id]: { x: newX, y: newY }
+      };
+    });
+  }, []);
 
   const nextLayer = () => setActiveLayer(prev => Math.min(prev + 1, 4));
   const prevLayer = () => setActiveLayer(prev => Math.max(prev - 1, 0));
 
+  // Handle scroll-based navigation
+  const lastScrollTime = useRef(0);
+  const scrollCooldown = 1000; // ms
+
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      const now = Date.now();
+      if (now - lastScrollTime.current < scrollCooldown) return;
+
+      if (Math.abs(e.deltaY) > 20) {
+        if (e.deltaY > 0) {
+          if (activeLayer < 4) {
+            nextLayer();
+            lastScrollTime.current = now;
+          }
+        } else {
+          if (activeLayer > 0) {
+            prevLayer();
+            lastScrollTime.current = now;
+          }
+        }
+      }
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: true });
+    return () => window.removeEventListener('wheel', handleWheel);
+  }, [activeLayer]);
+
   return (
     <div className="relative w-full h-screen overflow-hidden bg-neural-dark font-sans" ref={containerRef}>
       {/* Background Elements */}
-      <div className="fixed inset-0 neural-grid opacity-20 pointer-events-none" />
-      
-      {/* Global Dynamic Background Tint */}
-      <motion.div 
-        className="fixed inset-0 pointer-events-none"
-        style={{ zIndex: -1 }}
-        animate={{
-          background: activeLayer === 4 
-            ? 'radial-gradient(circle at bottom, rgba(34, 197, 94, 0.08) 0%, rgba(11, 14, 20, 1) 100%)'
-            : activeLayer === 0
-            ? 'radial-gradient(circle at center, rgba(59, 130, 246, 0.03) 0%, rgba(11, 14, 20, 1) 100%)'
-            : 'radial-gradient(circle at center, rgba(168, 85, 247, 0.03) 0%, rgba(11, 14, 20, 1) 100%)'
-        }}
-        transition={{ duration: 1.2, ease: "easeInOut" }}
+      <div 
+        className="fixed inset-0 pointer-events-none opacity-20" 
+        style={{ 
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='2' cy='2' r='0.5' fill='white'/%3E%3C/svg%3E")`,
+          backgroundSize: '40px 40px'
+        }} 
       />
+      
+      {/* Global Dynamic Background Tint - Using Opacity for GPU acceleration */}
+      <div className="fixed inset-0 pointer-events-none" style={{ zIndex: -1 }}>
+        <motion.div 
+          className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.03)_0%,rgba(11,14,20,1)_100%)]"
+          animate={{ opacity: activeLayer === 0 ? 1 : 0 }}
+          transition={{ duration: 1.2 }}
+        />
+        <motion.div 
+          className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.03)_0%,rgba(11,14,20,1)_100%)]"
+          animate={{ opacity: (activeLayer > 0 && activeLayer < 4) ? 1 : 0 }}
+          transition={{ duration: 1.2 }}
+        />
+        <motion.div 
+          className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,rgba(34,197,94,0.08)_0%,rgba(11,14,20,1)_100%)]"
+          animate={{ opacity: activeLayer === 4 ? 1 : 0 }}
+          transition={{ duration: 1.2 }}
+        />
+      </div>
 
       <div className="fixed top-20 right-20 opacity-5 pointer-events-none select-none">
         <pre className="font-mono text-xs text-neural-blue">
@@ -77,430 +135,400 @@ export default function App() {
         </pre>
       </div>
 
-      {/* Layer Navigation Indicators (Top) */}
-      <div className="fixed top-8 left-1/2 -translate-x-1/2 z-50 flex items-center space-x-4">
-        {[0, 1, 2, 3, 4].map(layer => (
-          <div key={layer} className="flex items-center">
-            <button
-              onClick={() => setActiveLayer(layer)}
-              className={`w-3 h-3 rounded-full transition-all duration-500 ${
-                activeLayer === layer 
-                  ? "bg-neural-blue glow-blue scale-125" 
-                  : "bg-white/10 hover:bg-white/30"
-              }`}
-            />
-            {layer < 4 && <div className="w-8 h-[1px] bg-white/5 mx-2" />}
-          </div>
-        ))}
+      {/* Layer Navigation Indicators (Bottom) */}
+      <div className="fixed bottom-12 left-1/2 -translate-x-1/2 z-50 flex items-center space-x-4 md:space-x-8">
+        <button 
+          onClick={prevLayer}
+          disabled={activeLayer === 0}
+          className="p-1.5 md:p-2 rounded-full glass hover:bg-neural-blue/10 transition-all disabled:opacity-20 disabled:cursor-not-allowed group"
+        >
+          <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-neural-blue group-hover:scale-110 transition-transform" />
+        </button>
+
+        <div className="flex items-center">
+          {[0, 1, 2, 3, 4].map(layer => (
+            <div key={layer} className="flex items-center">
+              <button
+                onClick={() => setActiveLayer(layer)}
+                className={`w-3 h-3 md:w-4 md:h-4 rounded-full transition-all duration-500 z-10 ${
+                  activeLayer === layer 
+                    ? "bg-neural-blue shadow-[0_0_15px_rgba(59,130,246,0.6)] scale-125" 
+                    : "bg-white/10 hover:bg-white/30"
+                }`}
+              />
+              {layer < 4 && (
+                <div className={`w-8 md:w-12 h-[1px] transition-colors duration-500 ${
+                  activeLayer > layer ? "bg-neural-blue/40" : "bg-white/10"
+                }`} />
+              )}
+            </div>
+          ))}
+        </div>
+
+        <button 
+          onClick={nextLayer}
+          disabled={activeLayer === 4}
+          className="p-1.5 md:p-2 rounded-full glass hover:bg-neural-blue/10 transition-all disabled:opacity-20 disabled:cursor-not-allowed group"
+        >
+          <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-neural-blue group-hover:scale-110 transition-transform" />
+        </button>
       </div>
 
       {/* Main Layers Container */}
       <motion.main
         ref={contentRef}
         className="flex w-[500vw] h-full"
+        style={{ willChange: 'transform' }}
         animate={{ x: `-${activeLayer * 100}vw` }}
-        transition={{ type: "spring", damping: 20, stiffness: 60 }}
+        transition={{ 
+          type: "spring", 
+          damping: 20, 
+          stiffness: 100,
+          mass: 0.8,
+          restDelta: 0.001
+        }}
       >
-        {/* SVG Connections Container (Inside Sliding Content) */}
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          {/* Input to Education Connections */}
-          {activeLayer >= 0 && nodePositions['input-1'] && EDUCATION.map((edu) => (
+        {/* SVG Connections Container (Inside Sliding Content) - Consolidated into ONE SVG */}
+        <svg className="absolute inset-0 z-0 pointer-events-none w-full h-full overflow-visible">
+          {/* All connections are rendered and kept in DOM (Prerendered) */}
+          {nodePositions['input-1'] && EDUCATION.map((edu) => (
             nodePositions[edu.id] && (
               <Connection 
                 key={`conn-input-${edu.id}`}
                 from={nodePositions['input-1']} 
                 to={nodePositions[edu.id]} 
-                active={activeLayer === 1 || hoveredNode === edu.id}
+                active={activeLayer >= 1 || hoveredNode === 'input-1' || hoveredNode === edu.id}
+                isConsolidated
               />
             )
           ))}
           
-          {/* Education to Experience Connections */}
-          {activeLayer >= 1 && EDUCATION.map((edu) => (
+          {EDUCATION.map((edu) => (
             EXPERIENCE.map((exp) => (
               nodePositions[edu.id] && nodePositions[exp.id] && (
                 <Connection 
                   key={`conn-${edu.id}-${exp.id}`}
                   from={nodePositions[edu.id]} 
                   to={nodePositions[exp.id]} 
-                  active={activeLayer === 2 || hoveredNode === edu.id || hoveredNode === exp.id}
+                  active={activeLayer >= 2 || hoveredNode === edu.id || hoveredNode === exp.id}
+                  isConsolidated
+                  startOffset={sideTextOffset}
                 />
               )
             ))
           ))}
 
-          {/* Experience to Projects Connections */}
-          {activeLayer >= 2 && EXPERIENCE.map((exp) => (
+          {EXPERIENCE.map((exp) => (
             PROJECTS.map((proj) => (
               nodePositions[exp.id] && nodePositions[proj.id] && (
                 <Connection 
                   key={`conn-${exp.id}-${proj.id}`}
                   from={nodePositions[exp.id]} 
                   to={nodePositions[proj.id]} 
-                  active={activeLayer === 3 || hoveredNode === exp.id || hoveredNode === proj.id}
+                  active={activeLayer >= 3 || hoveredNode === exp.id || hoveredNode === proj.id}
+                  isConsolidated
+                  startOffset={sideTextOffset}
+                  endOffset={0}
                 />
               )
             ))
           ))}
 
-          {/* Projects to Output Connections */}
-          {activeLayer >= 3 && PROJECTS.map((proj) => (
+          {PROJECTS.map((proj) => (
             ['output-inference'].map(outId => (
               nodePositions[proj.id] && nodePositions[outId] && (
                 <Connection 
                   key={`conn-proj-${proj.id}-${outId}`}
                   from={nodePositions[proj.id]} 
                   to={nodePositions[outId]} 
-                  active={activeLayer === 4}
+                  active={activeLayer >= 4 || hoveredNode === proj.id || hoveredNode === outId}
+                  isConsolidated
+                  startOffset={sideTextOffset}
                 />
               )
             ))
           ))}
-        </div>
+        </svg>
 
         {/* LAYER 0: INPUT LAYER (Intro) */}
-        <div className="w-full h-full flex items-center justify-center relative p-12">
-          <div className="max-w-2xl text-center space-y-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="inline-block px-4 py-1 rounded-full border border-neural-blue/30 bg-neural-blue/10 text-neural-blue text-xs font-mono mb-4"
-            >
-              Input Node #IDENTITY
-            </motion.div>
-            <h1 className="text-7xl font-bold font-mono tracking-tighter text-white">
-              MANUEL <span className="text-gradient">WIRTH</span>
-            </h1>
-            <p className="text-xl text-gray-400 max-w-lg mx-auto font-light leading-relaxed">
-              Master of Science: <span className="text-neural-blue">Data Science</span> at University of Mannheim.
-            </p>
-            <div className="pt-12 flex justify-center">
-              <NetworkNode 
-                id="input-1"
-                type="input"
-                label="FORWARD PASS"
-                isActive={activeLayer === 0}
-                onClick={nextLayer}
-                onPositionUpdate={updateNodePosition}
-                className="w-32 h-32 text-sm"
-              />
+        <div className="w-full h-full flex items-center justify-center relative p-6 md:p-12">
+          <div className="relative flex flex-col items-center">
+            {/* Top Content (Positioned relative to centered node) */}
+            <div className="absolute bottom-full mb-8 md:mb-12 w-[90vw] md:w-[80vw] max-w-2xl text-center">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="inline-block px-3 py-1 rounded-full border border-neural-blue/30 bg-neural-blue/10 text-neural-blue text-[9px] md:text-[10px] font-mono mb-4 md:mb-6"
+              >
+                Portfolio
+              </motion.div>
+              <h1 className="text-4xl md:text-7xl font-bold font-mono tracking-tighter text-white mb-4">
+                MANUEL WIRTH
+              </h1>
+              <p className="text-lg md:text-xl text-gray-400 font-light leading-relaxed">
+                M.Sc. <span className="text-neon-purple">Data Science</span> Student @ University of Mannheim.
+              </p>
             </div>
-            
-            <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center space-x-2 text-gray-500 animate-pulse">
-              <span className="text-xs font-mono uppercase tracking-widest">Propagation Started</span>
-              <ChevronRight size={14} />
-            </div>
+
+            {/* The Centered Node */}
+            <NetworkNode 
+              id="input-1"
+              type="input"
+              label="START"
+              isActive={activeLayer >= 0}
+              onClick={nextLayer}
+              onPositionUpdate={updateNodePosition}
+              onMouseEnter={() => setHoveredNode('input-1')}
+              onMouseLeave={() => setHoveredNode(null)}
+              className="w-24 h-24 md:w-32 md:h-32 text-xs md:text-sm z-10"
+            />
           </div>
         </div>
-
+        
         {/* LAYER 1: HIDDEN LAYER 1 (Education) */}
-        <div className="w-full h-full flex items-center justify-center relative p-12 overflow-hidden">
-          <div className="flex flex-col gap-24">
+        <div className="w-full h-full flex items-center justify-center relative p-6 md:p-12 overflow-hidden">
+          <div className="flex flex-col gap-16 md:gap-32">
             {EDUCATION.map((edu, index) => (
-              <div key={edu.id} className="flex items-center space-x-12">
+              <div key={edu.id} className="flex items-center space-x-4 md:space-x-6">
                 <NetworkNode 
                   id={edu.id}
                   type="hidden"
-                  label={edu.degree.split(' ')[0]}
-                  isActive={activeLayer === 1}
+                  label={edu.id === 'edu-msc' ? 'M.Sc.' : 'B.Sc.'}
+                  isActive={activeLayer >= 1}
                   onClick={() => setSelectedItem(edu)}
                   onPositionUpdate={updateNodePosition}
                   onMouseEnter={() => setHoveredNode(edu.id)}
                   onMouseLeave={() => setHoveredNode(null)}
+                  className="w-20 h-20 md:w-28 md:h-28"
                 />
-                <motion.div 
-                   initial={{ opacity: 0, x: -20 }}
-                   whileInView={{ opacity: 1, x: 0 }}
-                   className="hidden md:block max-w-sm"
-                >
-                  <h3 className="text-white font-mono text-lg mb-1">{edu.degree}</h3>
-                  <p className="text-gray-500 text-sm">{edu.institution} | Grade: {edu.grade}</p>
-                </motion.div>
+                <div className="flex flex-col justify-center max-w-[140px] md:max-w-sm space-y-1 md:space-y-2 -translate-y-[4px]">
+                  <h3 className="text-white font-mono text-sm md:text-2xl leading-tight font-bold truncate md:whitespace-normal">{edu.degree}</h3>
+                  <p className="text-neon-purple text-[10px] md:text-lg leading-tight truncate md:whitespace-normal">{edu.institution}</p>
+                </div>
               </div>
             ))}
           </div>
           
-          <div className="absolute top-1/2 left-12 -translate-y-1/2">
-             <button onClick={prevLayer} className="p-4 rounded-full glass hover:bg-white/10 transition-colors">
-               <ChevronLeft className="text-neon-purple" />
-             </button>
-          </div>
-          <div className="absolute top-1/2 right-12 -translate-y-1/2">
-             <button onClick={nextLayer} className="p-4 rounded-full glass hover:bg-white/10 transition-colors">
-               <ChevronRight className="text-neon-purple" />
-             </button>
-          </div>
           <div className="absolute top-12 left-1/2 -translate-x-1/2 text-center">
-            <span className="text-[10px] font-mono text-neon-purple/60 uppercase tracking-[0.5em]">LAYER_01: EDUCATION</span>
+            <span className="text-[18px] md:text-[24px] font-mono text-neon-purple/60 uppercase tracking-[0.3em] md:tracking-[0.5em]">EDUCATION</span>
           </div>
         </div>
 
         {/* LAYER 2: HIDDEN LAYER 2 (Experience) */}
-        <div className="w-full h-full flex items-center justify-center relative p-12 overflow-hidden">
-          <div className="flex flex-col gap-16">
+        <div className="w-full h-full flex items-center justify-center relative p-6 md:p-12 overflow-hidden">
+          <div className="flex flex-col gap-16 md:gap-32">
             {EXPERIENCE.map((exp, index) => (
-              <div key={exp.id} className="flex items-center space-x-12">
+              <div key={exp.id} className="flex items-center space-x-4 md:space-x-6">
                 <NetworkNode 
                   id={exp.id}
                   type="hidden"
                   label={exp.company.split(' ')[0]}
-                  isActive={activeLayer === 2}
+                  isActive={activeLayer >= 2}
                   onClick={() => setSelectedItem(exp)}
                   onPositionUpdate={updateNodePosition}
                   onMouseEnter={() => setHoveredNode(exp.id)}
                   onMouseLeave={() => setHoveredNode(null)}
+                  className="w-20 h-20 md:w-28 md:h-28"
                 />
-                <motion.div 
-                   initial={{ opacity: 0, x: -20 }}
-                   whileInView={{ opacity: 1, x: 0 }}
-                   className="hidden md:block max-w-sm"
-                >
-                  <h3 className="text-white font-mono text-lg mb-1">{exp.role}</h3>
-                  <p className="text-neon-purple text-xs font-mono">{exp.company} • {exp.period}</p>
-                </motion.div>
+                <div className="flex flex-col justify-center max-w-[140px] md:max-w-sm space-y-1 md:space-y-2 -translate-y-[4px]">
+                  <h3 className="text-white font-mono text-sm md:text-xl leading-tight font-bold truncate md:whitespace-normal">{exp.role}</h3>
+                  <p className="text-neon-purple text-[10px] md:text-base font-mono leading-tight truncate md:whitespace-normal">{exp.company} • {exp.period}</p>
+                </div>
               </div>
             ))}
           </div>
           
-          <div className="absolute top-1/2 left-12 -translate-y-1/2">
-             <button onClick={prevLayer} className="p-4 rounded-full glass hover:bg-white/10 transition-colors">
-               <ChevronLeft className="text-neon-purple" />
-             </button>
-          </div>
-          <div className="absolute top-1/2 right-12 -translate-y-1/2">
-             <button onClick={nextLayer} className="p-4 rounded-full glass hover:bg-white/10 transition-colors">
-               <ChevronRight className="text-neon-purple" />
-             </button>
-          </div>
           <div className="absolute top-12 left-1/2 -translate-x-1/2 text-center">
-            <span className="text-[10px] font-mono text-neon-purple/60 uppercase tracking-[0.5em]">LAYER_02: WORK_EXPERIENCE</span>
+            <span className="text-[18px] md:text-[24px] font-mono text-neon-purple/60 uppercase tracking-[0.3em] md:tracking-[0.5em]">WORK_EXPERIENCE</span>
           </div>
         </div>
 
         {/* LAYER 3: HIDDEN LAYER 3 (Projects) */}
-        <div className="w-full h-full flex items-center justify-center relative p-12 overflow-hidden">
-          <div className="flex flex-col gap-16">
+        <div className="w-full h-full flex items-center justify-center relative p-6 md:p-12 overflow-hidden">
+          <div className="flex flex-col gap-12 md:gap-16">
             {PROJECTS.map((proj, index) => (
-              <div key={proj.id} className="flex items-center space-x-12">
+              <div key={proj.id} className="flex items-center space-x-4 md:space-x-8">
                 <NetworkNode 
                   id={proj.id}
                   type="hidden"
                   label={proj.title.split(' ')[0]}
-                  isActive={activeLayer === 3}
+                  isActive={activeLayer >= 3}
                   onClick={() => setSelectedItem(proj)}
                   onPositionUpdate={updateNodePosition}
                   onMouseEnter={() => setHoveredNode(proj.id)}
                   onMouseLeave={() => setHoveredNode(null)}
+                  className="w-20 h-20 md:w-28 md:h-28"
                 />
-                <motion.div 
-                   initial={{ opacity: 0, x: -20 }}
-                   whileInView={{ opacity: 1, x: 0 }}
-                   className="hidden md:block max-w-sm"
-                >
-                  <h3 className="text-white font-mono text-lg mb-1">{proj.title}</h3>
-                  <p className="text-gray-500 text-sm line-clamp-1">{proj.description}</p>
-                </motion.div>
+                <div className="flex flex-col justify-center max-w-[140px] md:max-w-sm space-y-1 md:space-y-2 -translate-y-[1px]">
+                  <h3 className="text-white font-mono text-sm md:text-2xl leading-tight font-bold truncate md:whitespace-normal">{proj.title}</h3>
+                  <p className="text-neon-purple text-[10px] md:text-base line-clamp-1 leading-tight">{proj.description}</p>
+                </div>
               </div>
             ))}
           </div>
           
-          <div className="absolute top-1/2 left-12 -translate-y-1/2">
-             <button onClick={prevLayer} className="p-4 rounded-full glass hover:bg-white/10 transition-colors">
-               <ChevronLeft className="text-neon-purple" />
-             </button>
-          </div>
-          <div className="absolute top-1/2 right-12 -translate-y-1/2">
-             <button onClick={nextLayer} className="p-4 rounded-full glass hover:bg-white/10 transition-colors">
-               <ChevronRight className="text-neon-purple" />
-             </button>
-          </div>
           <div className="absolute top-12 left-1/2 -translate-x-1/2 text-center">
-            <span className="text-[10px] font-mono text-neon-purple/60 uppercase tracking-[0.5em]">LAYER_03: SELECTED_PROJECTS</span>
+            <span className="text-[18px] md:text-[24px] font-mono text-neon-purple/60 uppercase tracking-[0.3em] md:tracking-[0.5em]">SELECTED_PROJECTS</span>
           </div>
         </div>
 
         {/* LAYER 4: OUTPUT LAYER (The Inference) */}
-        <div className="w-full h-full flex flex-col items-center justify-center relative p-12">
-           <div className="text-center mb-16 space-y-4">
-             <div className="flex justify-center mb-6">
-                <div className="w-24 h-24 rounded-full border border-green-500/30 bg-green-500/10 flex items-center justify-center">
-                   <div className="w-8 h-8 rounded-full bg-green-500 shadow-[0_0_30px_rgba(34,197,94,0.8)]" />
+        <div className="w-full h-full flex items-center justify-center relative p-6 md:p-12">
+          <div className="relative flex flex-col items-center">
+             {/* Top Content */}
+             <div className="absolute bottom-full mb-12 md:mb-16 text-center w-[90vw] md:w-[80vw]">
+                <div className="flex justify-center mb-4 md:mb-6">
+                   <div className="w-16 h-16 md:w-20 md:h-20 rounded-full border border-purple-500/30 bg-purple-500/10 flex items-center justify-center">
+                      <div className="w-4 h-4 md:w-6 md:h-6 rounded-full bg-purple-500 shadow-[0_0_30px_rgba(168,83,244,0.8)]" />
+                   </div>
                 </div>
+                <h2 className="text-2xl md:text-3xl font-bold text-purple-400 font-mono tracking-tighter">Candidate_Fit = 0.97</h2>
              </div>
-             <h2 className="text-6xl font-bold text-green-400 font-mono tracking-tighter">Candidate_Fit = 0.97</h2>
-           </div>
 
-           <div className="flex flex-col md:flex-row gap-16 items-center">
-              <div className="flex flex-col items-center space-y-8">
-                <NetworkNode 
-                  id="output-inference"
-                  type="output"
-                  label="INFERENCE"
-                  isActive={activeLayer === 4}
-                  onPositionUpdate={updateNodePosition}
-                  className="w-36 h-36"
-                />
-                <div className="flex space-x-6">
-                  <a href="https://linkedin.com" target="_blank" className="p-3 rounded-full glass hover:bg-neural-blue/20 transition-all text-gray-400 hover:text-neural-blue">
-                    <Linkedin size={20} />
+             {/* The Centered Node */}
+             <NetworkNode 
+                id="output-inference"
+                type="output"
+                label="CONTACT"
+                isActive={activeLayer >= 4}
+                onPositionUpdate={updateNodePosition}
+                className="w-28 h-28 md:w-36 md:h-36 z-10"
+             />
+
+             {/* Bottom Content */}
+             <div className="absolute top-full mt-8 md:mt-12 flex flex-col items-center space-y-6 md:space-y-8">
+                <div className="flex space-x-4 md:space-x-6">
+                  <a href="https://linkedin.com" target="_blank" className="p-2.5 md:p-3 rounded-full glass hover:bg-neural-blue/20 transition-all text-gray-400 hover:text-neural-blue">
+                    <Linkedin size={18} />
                   </a>
-                  <a href="mailto:wirthosmanuel@gmail.com" className="p-3 rounded-full glass hover:bg-neon-purple/20 transition-all text-gray-400 hover:text-neon-purple">
-                    <Mail size={20} />
+                  <a href="mailto:wirthosmanuel@gmail.com" className="p-2.5 md:p-3 rounded-full glass hover:bg-neon-purple/20 transition-all text-gray-400 hover:text-neon-purple">
+                    <Mail size={18} />
                   </a>
                   <a href="https://github.com" target="_blank" className="p-3 rounded-full glass hover:bg-white/10 transition-all text-gray-400 hover:text-white">
-                    <Github size={20} />
+                    <Github size={18} />
                   </a>
                 </div>
-              </div>
-           </div>
-
-           <footer className="absolute bottom-12 w-full max-w-5xl px-12 flex justify-between items-end border-t border-white/5 pt-8">
-              <div className="space-y-4">
-                <span className="text-[10px] font-mono text-gray-500 uppercase block tracking-widest">Recursive Optimization Complete</span>
-                <div className="text-xs font-mono text-neural-blue opacity-50 flex items-center space-x-2">
-                   <Terminal size={14} />
-                   <span>Loss minimized at iter 10,000</span>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-[10px] font-mono text-gray-600 uppercase tracking-tighter">© 2026 Manuel Wirth Portfolio</p>
-                <p className="text-[10px] font-mono text-neural-blue">Inference Engine v5.0.0</p>
-              </div>
-           </footer>
-
-           <div className="absolute top-1/2 left-12 -translate-y-1/2">
-             <button onClick={prevLayer} className="p-4 rounded-full glass hover:bg-white/10 transition-colors">
-               <ChevronLeft className="text-neural-blue" />
-             </button>
+             </div>
           </div>
         </div>
       </motion.main>
 
-      {/* Modal (Glassmorphism) */}
+      <footer className="fixed bottom-8 right-12 z-50 text-right pointer-events-none">
+        <p className="text-[10px] font-mono text-gray-500/60 uppercase tracking-widest">
+          Mannheim, DE | Last updated: 2026-03-31
+        </p>
+      </footer>
+
       <AnimatePresence>
         {selectedItem && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-            <motion.div 
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setSelectedItem(null)}
               className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             />
+            
             <motion.div
-              layoutId={`node-${'id' in selectedItem ? selectedItem.id : ''}`}
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="relative w-full max-w-2xl glass p-10 rounded-3xl shadow-2xl space-y-8 overflow-hidden"
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-2xl glass rounded-2xl overflow-hidden shadow-2xl"
             >
-              {/* Modal Background Decor */}
-              <div className="absolute -top-24 -right-24 w-48 h-48 bg-neural-blue/10 blur-[80px] rounded-full" />
-              
-              <div className="flex justify-between items-start">
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2 text-neural-blue text-[10px] font-mono">
-                    <Database size={12} />
-                    <span>OBJECT_METADATA_LOADED</span>
+              <button 
+                onClick={() => setSelectedItem(null)}
+                className="absolute top-6 right-6 p-2 rounded-full hover:bg-white/10 transition-colors z-10"
+              >
+                <X size={20} className="text-gray-400" />
+              </button>
+
+              <div className="p-8 pt-12">
+                {'title' in selectedItem ? (
+                  // Project
+                  <div className="space-y-6">
+                    <div>
+                      <h2 className="text-3xl font-bold text-white font-mono tracking-tighter mb-2">
+                        {selectedItem.title}
+                      </h2>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedItem.tech.map(t => (
+                          <span key={t} className="px-2 py-0.5 rounded-full bg-neural-blue/10 border border-neural-blue/30 text-neural-blue text-[10px] font-mono">
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-gray-300 leading-relaxed">{selectedItem.details}</p>
+                    {selectedItem.metrics && (
+                      <div className="space-y-2">
+                        <h4 className="text-[10px] font-mono text-gray-500 uppercase tracking-widest">Key Metrics</h4>
+                        <div className="grid grid-cols-1 gap-2">
+                          {selectedItem.metrics.map((m, i) => (
+                            <div key={i} className="flex items-center space-x-2 text-sm text-green-400">
+                              <Trophy size={14} />
+                              <span>{m}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {selectedItem.link && (
+                      <a 
+                        href={selectedItem.link} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center space-x-2 text-neural-blue hover:underline text-sm font-mono"
+                      >
+                        <ExternalLink size={14} />
+                        <span>View Project Source</span>
+                      </a>
+                    )}
                   </div>
-                  <h2 className="text-4xl font-bold text-white font-mono tracking-tighter">
-                    {'title' in selectedItem ? selectedItem.title : ('degree' in selectedItem ? selectedItem.degree : selectedItem.company)}
-                  </h2>
-                </div>
-                <button 
-                  onClick={() => setSelectedItem(null)}
-                  className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-gray-400 hover:text-white transition-colors"
-                >
-                   EXIT_NODE [esc]
-                </button>
+                ) : 'degree' in selectedItem ? (
+                  // Education
+                  <div className="space-y-6">
+                    <div>
+                      <h2 className="text-3xl font-bold text-white font-mono tracking-tighter mb-1">
+                        {selectedItem.degree}
+                      </h2>
+                      <p className="text-neon-purple font-mono text-sm">{selectedItem.institution}</p>
+                    </div>
+                    <div className="flex items-center space-x-4 text-xs font-mono text-gray-500">
+                      <span>{selectedItem.period}</span>
+                      <span>•</span>
+                      <span>Grade: {selectedItem.grade}</span>
+                    </div>
+                    <p className="text-gray-300 leading-relaxed">{selectedItem.details}</p>
+                  </div>
+                ) : (
+                  // Experience
+                  <div className="space-y-6">
+                    <div>
+                      <h2 className="text-3xl font-bold text-white font-mono tracking-tighter mb-1">
+                        {selectedItem.role}
+                      </h2>
+                      <p className="text-neon-purple font-mono text-sm">{selectedItem.company}</p>
+                    </div>
+                    <p className="text-xs font-mono text-gray-500">{selectedItem.period}</p>
+                    <div className="space-y-3">
+                      <h4 className="text-[10px] font-mono text-gray-500 uppercase tracking-widest">Responsibilities</h4>
+                      <ul className="space-y-2">
+                        {selectedItem.tasks.map((task, i) => (
+                          <li key={i} className="flex items-start space-x-3 text-gray-300 text-sm">
+                            <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-neural-blue shrink-0" />
+                            <span>{task}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
               </div>
-
-              {/* Education Details */}
-              {'institution' in selectedItem && (
-                <div className="space-y-6">
-                  <div className="flex items-center space-x-4 text-neural-blue">
-                    <GraduationCap size={24} />
-                    <span className="font-mono text-lg">{selectedItem.institution}</span>
-                  </div>
-                  <div className="p-4 rounded-xl bg-white/5 border border-white/5 flex justify-between items-center">
-                    <span className="text-xs text-gray-500 font-mono uppercase">Performance_Index (Grade)</span>
-                    <span className="text-2xl font-bold font-mono text-white">{selectedItem.grade}</span>
-                  </div>
-                  <p className="text-gray-400 leading-relaxed font-mono text-sm">{selectedItem.details}</p>
-                </div>
-              )}
-
-              {/* Experience Details */}
-              {'role' in selectedItem && !('degree' in selectedItem) && (
-                <div className="space-y-6">
-                  <div className="flex items-center space-x-4 text-neon-purple">
-                    <Briefcase size={24} />
-                    <span className="font-mono text-lg">{selectedItem.role}</span>
-                  </div>
-                  <div className="space-y-2">
-                    <h4 className="text-[10px] font-mono text-gray-500 uppercase tracking-widest">Core_Responsibilities</h4>
-                    <ul className="space-y-3">
-                      {(selectedItem as Experience).tasks.map((task, i) => (
-                        <li key={i} className="flex items-start space-x-3 text-sm text-gray-400">
-                           <div className="w-1.5 h-1.5 rounded-full bg-neon-purple mt-1.5 shrink-0" />
-                           <span className="font-mono">{task}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              )}
-
-              {/* Project Details */}
-              {'tech' in selectedItem && !('role' in selectedItem) && (
-                <div className="space-y-6">
-                   <div className="flex items-center space-x-3">
-                      <Trophy className="text-yellow-500" size={20} />
-                      <p className="text-gray-300 font-mono text-sm">{(selectedItem as Project).description}</p>
-                   </div>
-                   <div className="space-y-2">
-                    <h4 className="text-[10px] font-mono text-gray-500 uppercase tracking-widest">Architecture_Overview</h4>
-                    <p className="text-gray-400 leading-relaxed font-mono text-sm">{(selectedItem as Project).details}</p>
-                   </div>
-                   <div className="flex flex-wrap gap-2">
-                      {(selectedItem as Project).tech.map(t => (
-                        <span key={t} className="px-3 py-1 rounded-full bg-neural-blue/10 border border-neural-blue/30 text-neural-blue text-[10px] font-mono">
-                          {t}
-                        </span>
-                      ))}
-                   </div>
-                   {(selectedItem as Project).link && (
-                     <a 
-                       href={(selectedItem as Project).link} 
-                       target="_blank" 
-                       className="flex items-center justify-center space-x-2 w-full py-4 rounded-xl bg-white text-black font-bold hover:bg-neural-blue hover:text-white transition-all transform hover:scale-[1.02]"
-                     >
-                       <ExternalLink size={18} />
-                       <span>ACCESS_PUBLIC_PREPRINT</span>
-                     </a>
-                   )}
-                </div>
-              )}
             </motion.div>
           </div>
         )}
       </AnimatePresence>
-
-      {/* Floating Status Bar (Bottom Left) */}
-      <div className="fixed bottom-8 left-8 z-[60] hidden lg:flex items-center space-x-6 text-[10px] font-mono text-gray-500">
-         <div className="flex items-center space-x-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-            <span>GPU_CONVOLUTION_ACTIVE</span>
-         </div>
-         <div className="flex items-center space-x-2">
-            <Cpu size={12} className="text-neural-blue" />
-            <span>RTX_ON</span>
-         </div>
-         <div className="flex items-center space-x-2">
-            <Layers size={12} className="text-neon-purple" />
-            <span>NETWORK_DEPTH: {activeLayer + 1}/5</span>
-         </div>
-      </div>
     </div>
   );
 }
