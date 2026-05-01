@@ -10,7 +10,7 @@ function cn(...inputs: ClassValue[]) {
 interface NetworkNodeProps {
   id: string;
   type: 'input' | 'hidden' | 'output';
-  label: string;
+  label: React.ReactNode;
   isActive?: boolean;
   onClick?: () => void;
   onMouseEnter?: () => void;
@@ -65,9 +65,9 @@ export const NetworkNode: React.FC<NetworkNodeProps> = ({
   };
 
   const typeConfig = {
-    input: 'border-neural-blue text-neural-blue',
-    hidden: 'border-neon-purple text-neon-purple',
-    output: 'border-green-400 text-green-400',
+    input: 'border-white/20 text-white/40',
+    hidden: 'border-white/20 text-white/40',
+    output: 'border-white/20 text-white/40',
   };
 
   return (
@@ -87,7 +87,7 @@ export const NetworkNode: React.FC<NetworkNodeProps> = ({
         className
       )}
     >
-      <div className="text-[10px] md:text-xs font-bold text-center px-1 truncate w-full">
+      <div className="flex items-center justify-center w-full h-full">
         {label}
       </div>
     </motion.div>

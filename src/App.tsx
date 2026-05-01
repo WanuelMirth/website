@@ -17,7 +17,9 @@ import {
   Briefcase,
   Terminal,
   Trophy,
-  X
+  X,
+  FileText,
+  Presentation
 } from 'lucide-react';
 import { NetworkNode } from './components/NetworkNode';
 import { Connection } from './components/Connection';
@@ -77,6 +79,9 @@ export default function App() {
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
+      // Prevent scrolling if a project is selected
+      if (selectedItem) return;
+
       const now = Date.now();
       if (now - lastScrollTime.current < scrollCooldown) return;
 
@@ -97,7 +102,13 @@ export default function App() {
 
     window.addEventListener('wheel', handleWheel, { passive: true });
     return () => window.removeEventListener('wheel', handleWheel);
-  }, [activeLayer]);
+  }, [activeLayer, selectedItem]);
+
+  const renderNodeLabel = (label: string) => {
+    if (label === 'GITHUB') return <Github className="w-6 h-6 md:w-8 md:h-8" />;
+    if (label === 'PAPER') return <FileText className="w-6 h-6 md:w-8 md:h-8" />;
+    return <span className="text-[10px] md:text-lg font-bold font-mono">{label}</span>;
+  };
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-neural-dark font-sans" ref={containerRef}>
@@ -110,23 +121,9 @@ export default function App() {
         }} 
       />
       
-      {/* Global Dynamic Background Tint - Using Opacity for GPU acceleration */}
+      {/* Global Static Background Tint */}
       <div className="fixed inset-0 pointer-events-none" style={{ zIndex: -1 }}>
-        <motion.div 
-          className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.03)_0%,rgba(11,14,20,1)_100%)]"
-          animate={{ opacity: activeLayer === 0 ? 1 : 0 }}
-          transition={{ duration: 1.2 }}
-        />
-        <motion.div 
-          className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.03)_0%,rgba(11,14,20,1)_100%)]"
-          animate={{ opacity: (activeLayer > 0 && activeLayer < 4) ? 1 : 0 }}
-          transition={{ duration: 1.2 }}
-        />
-        <motion.div 
-          className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,rgba(34,197,94,0.08)_0%,rgba(11,14,20,1)_100%)]"
-          animate={{ opacity: activeLayer === 4 ? 1 : 0 }}
-          transition={{ duration: 1.2 }}
-        />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.03)_0%,rgba(11,14,20,1)_100%)]" />
       </div>
 
       <div className="fixed top-20 right-20 opacity-5 pointer-events-none select-none">
@@ -293,7 +290,7 @@ export default function App() {
                 <NetworkNode 
                   id={edu.id}
                   type="hidden"
-                  label={edu.id === 'edu-msc' ? 'M.Sc.' : 'B.Sc.'}
+                  label={renderNodeLabel(edu.nodeLabel)}
                   isActive={activeLayer >= 1}
                   onClick={() => setSelectedItem(edu)}
                   onPositionUpdate={updateNodePosition}
@@ -322,7 +319,7 @@ export default function App() {
                 <NetworkNode 
                   id={exp.id}
                   type="hidden"
-                  label={exp.company.split(' ')[0]}
+                  label={renderNodeLabel(exp.nodeLabel)}
                   isActive={activeLayer >= 2}
                   onClick={() => setSelectedItem(exp)}
                   onPositionUpdate={updateNodePosition}
@@ -347,11 +344,11 @@ export default function App() {
         <div className="w-full h-full flex items-center justify-center relative p-6 md:p-12 overflow-hidden">
           <div className="flex flex-col gap-12 md:gap-16">
             {PROJECTS.map((proj, index) => (
-              <div key={proj.id} className="flex items-center space-x-4 md:space-x-8">
+              <div key={proj.id} className="flex items-center space-x-4 md:space-x-6">
                 <NetworkNode 
                   id={proj.id}
                   type="hidden"
-                  label={proj.title.split(' ')[0]}
+                  label={renderNodeLabel(proj.nodeLabel)}
                   isActive={activeLayer >= 3}
                   onClick={() => setSelectedItem(proj)}
                   onPositionUpdate={updateNodePosition}
@@ -359,8 +356,10 @@ export default function App() {
                   onMouseLeave={() => setHoveredNode(null)}
                   className="w-20 h-20 md:w-28 md:h-28"
                 />
-                <div className="flex flex-col justify-center max-w-[140px] md:max-w-sm space-y-1 md:space-y-2 -translate-y-[1px]">
-                  <h3 className="text-white font-mono text-sm md:text-2xl leading-tight font-bold truncate md:whitespace-normal">{proj.title}</h3>
+                <div className="flex flex-col justify-center max-w-[140px] md:max-w-sm space-y-1 md:space-y-2 -translate-y-[4px]">
+                  <h3 className="text-white font-mono text-sm md:text-2xl leading-tight font-bold truncate md:whitespace-normal">
+                    {proj.displayTitle || proj.title}
+                  </h3>
                   <p className="text-neon-purple text-[10px] md:text-base line-clamp-1 leading-tight">{proj.description}</p>
                 </div>
               </div>
@@ -392,19 +391,19 @@ export default function App() {
                 label="CONTACT"
                 isActive={activeLayer >= 4}
                 onPositionUpdate={updateNodePosition}
-                className="w-28 h-28 md:w-36 md:h-36 z-10"
+                className="w-28 h-28 md:w-36 md:h-36 z-10 cursor-default hover:scale-100"
              />
 
              {/* Bottom Content */}
              <div className="absolute top-full mt-8 md:mt-12 flex flex-col items-center space-y-6 md:space-y-8">
                 <div className="flex space-x-4 md:space-x-6">
-                  <a href="https://linkedin.com" target="_blank" className="p-2.5 md:p-3 rounded-full glass hover:bg-neural-blue/20 transition-all text-gray-400 hover:text-neural-blue">
+                  <a href="https://www.linkedin.com/in/manuel-wirth-3a2a29264/" target="_blank" className="p-2.5 md:p-3 rounded-full glass hover:bg-neural-blue/20 transition-all text-gray-400 hover:text-neural-blue">
                     <Linkedin size={18} />
                   </a>
-                  <a href="mailto:wirthosmanuel@gmail.com" className="p-2.5 md:p-3 rounded-full glass hover:bg-neon-purple/20 transition-all text-gray-400 hover:text-neon-purple">
+                  <a href="mailto:manuelwirth.mail@gmail.com" className="p-2.5 md:p-3 rounded-full glass hover:bg-neural-blue/20 transition-all text-gray-400 hover:text-neural-blue">
                     <Mail size={18} />
                   </a>
-                  <a href="https://github.com" target="_blank" className="p-3 rounded-full glass hover:bg-white/10 transition-all text-gray-400 hover:text-white">
+                  <a href="https://github.com/WanuelMirth" target="_blank" className="p-3 rounded-full glass hover:bg-neural-blue/20 transition-all text-gray-400 hover:text-neural-blue">
                     <Github size={18} />
                   </a>
                 </div>
@@ -413,9 +412,9 @@ export default function App() {
         </div>
       </motion.main>
 
-      <footer className="fixed bottom-8 right-12 z-50 text-right pointer-events-none">
-        <p className="text-[10px] font-mono text-gray-500/60 uppercase tracking-widest">
-          Mannheim, DE | Last updated: 2026-03-31
+      <footer className="fixed bottom-4 md:bottom-8 right-6 md:right-12 z-50 text-right pointer-events-none">
+        <p className="text-[8px] md:text-[12px] font-mono text-white-500/60 uppercase tracking-widest">
+          Mannheim, DE | 2026-05-01
         </p>
       </footer>
 
@@ -443,12 +442,12 @@ export default function App() {
                 <X size={20} className="text-gray-400" />
               </button>
 
-              <div className="p-8 pt-12">
+              <div className="p-8 pt-12 max-h-[90vh] overflow-y-auto">
                 {'title' in selectedItem ? (
                   // Project
                   <div className="space-y-6">
                     <div>
-                      <h2 className="text-3xl font-bold text-white font-mono tracking-tighter mb-2">
+                      <h2 className="text-2xl md:text-3xl font-bold text-white font-mono tracking-tighter mb-2">
                         {selectedItem.title}
                       </h2>
                       <div className="flex flex-wrap gap-2">
@@ -459,7 +458,32 @@ export default function App() {
                         ))}
                       </div>
                     </div>
-                    <p className="text-gray-300 leading-relaxed">{selectedItem.details}</p>
+
+                    {selectedItem.image && (
+                      <div className="w-full rounded-lg overflow-hidden border border-white/10 bg-black/20">
+                        <img 
+                          src={selectedItem.image} 
+                          alt={selectedItem.title} 
+                          className="w-full h-auto object-contain"
+                        />
+                      </div>
+                    )}
+
+                    {'images' in selectedItem && selectedItem.images && (
+                      <div className="grid grid-cols-2 gap-4">
+                        {selectedItem.images.map((img, i) => (
+                          <div key={i} className="rounded-lg overflow-hidden border border-white/10 bg-black/20">
+                            <img 
+                              src={img} 
+                              alt={`${selectedItem.title} screenshot ${i + 1}`} 
+                              className="w-full h-auto object-contain"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{selectedItem.details}</p>
                     {selectedItem.metrics && (
                       <div className="space-y-2">
                         <h4 className="text-[10px] font-mono text-gray-500 uppercase tracking-widest">Key Metrics</h4>
@@ -473,17 +497,52 @@ export default function App() {
                         </div>
                       </div>
                     )}
-                    {selectedItem.link && (
-                      <a 
-                        href={selectedItem.link} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center space-x-2 text-neural-blue hover:underline text-sm font-mono"
-                      >
-                        <ExternalLink size={14} />
-                        <span>View Project Source</span>
-                      </a>
-                    )}
+                    <div className="flex flex-wrap gap-4 pt-4 border-t border-white/5">
+                      {selectedItem.link && (
+                        <a 
+                          href={selectedItem.link} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center space-x-2 text-neural-blue hover:underline text-sm font-mono"
+                        >
+                          <ExternalLink size={14} />
+                          <span>View Project Source</span>
+                        </a>
+                      )}
+                      {selectedItem.pdf && (
+                        <a 
+                          href={selectedItem.pdf} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center space-x-2 text-neural-blue hover:underline text-sm font-mono"
+                        >
+                          <FileText size={14} />
+                          <span>View Full Document (PDF)</span>
+                        </a>
+                      )}
+                      {'report' in selectedItem && selectedItem.report && (
+                        <a 
+                          href={selectedItem.report} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center space-x-2 text-neural-blue hover:underline text-sm font-mono"
+                        >
+                          <FileText size={14} />
+                          <span>View Project Report</span>
+                        </a>
+                      )}
+                      {'slides' in selectedItem && selectedItem.slides && (
+                        <a 
+                          href={selectedItem.slides} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center space-x-2 text-neural-blue hover:underline text-sm font-mono"
+                        >
+                          <Presentation size={14} />
+                          <span>View Presentation Slides</span>
+                        </a>
+                      )}
+                    </div>
                   </div>
                 ) : 'degree' in selectedItem ? (
                   // Education
