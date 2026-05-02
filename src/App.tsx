@@ -19,13 +19,16 @@ import {
   Trophy,
   X,
   FileText,
-  Presentation
+  Presentation,
+  User,
+  MapPin,
+  Sparkles
 } from 'lucide-react';
 import { NetworkNode } from './components/NetworkNode';
 import { Connection } from './components/Connection';
-import { PROJECTS, EDUCATION, EXPERIENCE, type Project, type Education, type Experience } from './data';
+import { PROJECTS, EDUCATION, EXPERIENCE, CONTACT_INFO, type Project, type Education, type Experience, type Contact } from './data';
 
-type DetailItem = Project | Education | Experience;
+type DetailItem = Project | Education | Experience | Contact;
 
 export default function App() {
   const [activeLayer, setActiveLayer] = useState(0);
@@ -390,24 +393,14 @@ export default function App() {
                 type="output"
                 label="CONTACT"
                 isActive={activeLayer >= 4}
+                onClick={() => setSelectedItem(CONTACT_INFO)}
                 onPositionUpdate={updateNodePosition}
-                className="w-28 h-28 md:w-36 md:h-36 z-10 cursor-default hover:scale-100"
+                onMouseEnter={() => setHoveredNode('output-inference')}
+                onMouseLeave={() => setHoveredNode(null)}
+                className="w-28 h-28 md:w-36 md:h-36 z-10 cursor-pointer"
              />
 
-             {/* Bottom Content */}
-             <div className="absolute top-full mt-8 md:mt-12 flex flex-col items-center space-y-6 md:space-y-8">
-                <div className="flex space-x-4 md:space-x-6">
-                  <a href="https://www.linkedin.com/in/manuel-wirth-3a2a29264/" target="_blank" className="p-2.5 md:p-3 rounded-full glass hover:bg-neural-blue/20 transition-all text-gray-400 hover:text-neural-blue">
-                    <Linkedin size={18} />
-                  </a>
-                  <a href="mailto:manuelwirth.mail@gmail.com" className="p-2.5 md:p-3 rounded-full glass hover:bg-neural-blue/20 transition-all text-gray-400 hover:text-neural-blue">
-                    <Mail size={18} />
-                  </a>
-                  <a href="https://github.com/WanuelMirth" target="_blank" className="p-3 rounded-full glass hover:bg-neural-blue/20 transition-all text-gray-400 hover:text-neural-blue">
-                    <Github size={18} />
-                  </a>
-                </div>
-             </div>
+             {/* Bottom Content removed */}
           </div>
         </div>
       </motion.main>
@@ -559,6 +552,52 @@ export default function App() {
                       <span>Grade: {selectedItem.grade}</span>
                     </div>
                     <p className="text-gray-300 leading-relaxed">{selectedItem.details}</p>
+                  </div>
+                ) : 'email' in selectedItem ? (
+                  // Contact Card
+                  <div className="space-y-8">
+                    <div className="flex flex-col md:flex-row items-center gap-8">
+                      <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-2 border-white bg-neural-dark overflow-hidden shrink-0">
+                        {selectedItem.image ? (
+                          <div className="w-full h-full rounded-full overflow-hidden">
+                            <img 
+                              src={selectedItem.image} 
+                              alt={selectedItem.name} 
+                              className="w-full h-full object-cover scale-125 translate-x-[2%]" 
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <User size={48} className="text-neural-blue/40" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-center md:text-left">
+                        <h2 className="text-4xl font-bold text-white font-mono tracking-tighter mb-2">{selectedItem.name}</h2>
+                        <p className="text-neon-purple font-mono text-lg mb-4">{selectedItem.role}</p>
+                        <div className="flex items-center justify-center md:justify-start gap-4 text-gray-400 text-sm font-mono">
+                          <div className="flex items-center gap-1.5">
+                            <MapPin size={14} />
+                            {selectedItem.location}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <a href={selectedItem.linkedin} target="_blank" className="flex items-center justify-center gap-3 p-4 rounded-xl glass hover:bg-neural-blue/10 transition-all group">
+                        <Linkedin size={20} className="text-gray-400 group-hover:text-neural-blue" />
+                        <span className="text-sm font-mono text-gray-300">LinkedIn</span>
+                      </a>
+                      <a href={`mailto:${selectedItem.email}`} className="flex items-center justify-center gap-3 p-4 rounded-xl glass hover:bg-neural-blue/10 transition-all group">
+                        <Mail size={20} className="text-gray-400 group-hover:text-neural-blue" />
+                        <span className="text-sm font-mono text-gray-300">Email</span>
+                      </a>
+                      <a href={selectedItem.github} target="_blank" className="flex items-center justify-center gap-3 p-4 rounded-xl glass hover:bg-neural-blue/10 transition-all group">
+                        <Github size={20} className="text-gray-400 group-hover:text-neural-blue" />
+                        <span className="text-sm font-mono text-gray-300">GitHub</span>
+                      </a>
+                    </div>
                   </div>
                 ) : (
                   // Experience

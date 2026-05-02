@@ -34,6 +34,30 @@ export interface Experience {
   tasks: string[];
 }
 
+export interface Contact {
+  id: "contact";
+  name: string;
+  role: string;
+  location: string;
+  email: string;
+  linkedin: string;
+  github: string;
+  image?: string;
+  skills: string[];
+}
+
+export const CONTACT_INFO: Contact = {
+  id: "contact",
+  name: "Manuel Wirth",
+  role: "M.Sc. Data Science Student",
+  location: "Mannheim, Germany",
+  email: "manuelwirth.mail@gmail.com",
+  linkedin: "https://www.linkedin.com/in/manuel-wirth-3a2a29264/",
+  github: "https://github.com/WanuelMirth",
+  image: "/visual/contact-card.jpg",
+  skills: ["Machine Learning", "Deep Learning", "Software Engineering", "AI Security", "Data Visualization"]
+};
+
 export const EDUCATION: Education[] = [
   {
     id: "edu-msc",
@@ -92,7 +116,7 @@ export const PROJECTS: Project[] = [
     tech: ["Sustainability", "TypeScript", "Data Viz", "React"],
     metrics: ["Awarded the Sustainability Prize by Mannheim's Dept. of Economic Development"],
     link: "https://github.com/WanuelMirth/neckarstadt-klima",
-    image: "/src/visual/key-visual.png"
+    image: "/visual/neckarstadt-klima.png"
   },
   {
     id: "proj-redteam",
@@ -104,8 +128,8 @@ export const PROJECTS: Project[] = [
     tech: ["AI Security", "Failure Mode", "Red-Teaming", "LLMs", "Reasoning Models"],
     metrics: ["New Failure Mode Identified", "Preprint available on arXiv"],
     link: "https://arxiv.org/abs/2602.18514",
-    pdf: "/src/visual/2602.18514v1.pdf",
-    image: "/src/visual/trojan-horse.png"
+    pdf: "/visual/paper.pdf",
+    image: "/visual/trojan-horse.png"
   },
   {
     id: "proj-bikereg",
@@ -116,9 +140,9 @@ export const PROJECTS: Project[] = [
     tech: ["Sustainability", "Python", "CatBoost", "Forecasting", "Rolling-Origin CV"],
     metrics: ["MAE: 24.22", "R²: 0.96", "Error reduction: 53%"],
     link: "https://github.com/WanuelMirth/bike-reg-mannheim",
-    image: "/src/visual/bikereg.png",
-    report: "/src/visual/Projektreport_BikeReg.pdf",
-    slides: "/src/visual/Abschlusspräsentation_BikeReg.pdf"
+    image: "/visual/bikereg.png",
+    report: "/visual/bikereg-report.pdf",
+    slides: "/visual/bikereg-presentation.pdf"
   },
   {
     id: "proj-thesis",
@@ -129,8 +153,8 @@ export const PROJECTS: Project[] = [
     tech: ["Python", "RL", "Simulation", "Pygame"],
     metrics: ["Grade: 1.0"],
     link: "https://github.com/WanuelMirth/bachelor-thesis",
-    image: "/src/visual/thesis.png",
-    pdf: "/src/visual/thesis_manuel_wirth.pdf"
+    image: "/visual/thesis.png",
+    pdf: "/visual/thesis.pdf"
   },
   {
     id: "proj-ctf",
@@ -141,6 +165,6 @@ export const PROJECTS: Project[] = [
     tech: ["C", "Security", "Exploitation", "Reverse Engineering"],
     metrics: ["Grade: 1.0"],
     link: "https://github.com/WanuelMirth/ctf",
-    image: "/src/visual/get-rotated-idiot.gif"
+    image: "/visual/get-rotated-idiot.gif"
   }
 ];
