@@ -37,8 +37,8 @@ export const Connection: React.FC<ConnectionProps> = ({
       <motion.path
         d={path}
         fill="none"
-        stroke={active ? "rgba(59, 130, 246, 0.4)" : "rgba(255, 255, 255, 0.3)"}
-        strokeWidth={active ? 2 : 1}
+        stroke={active ? "rgba(59, 130, 246, 0.4)" : "rgba(255, 255, 255, 0.4)"}
+        strokeWidth={active ? 2.5 : 1.5}
         initial={{ pathLength: 0 }}
         animate={{ pathLength: 1 }}
         transition={{ duration: 1, ease: "easeInOut" }}

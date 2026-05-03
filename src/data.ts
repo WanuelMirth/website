@@ -23,6 +23,8 @@ export interface Education {
   period: string;
   grade: string;
   details: string;
+  courses?: { name: string; grade: string }[];
+  association?: string;
 }
 
 export interface Experience {
@@ -30,6 +32,7 @@ export interface Experience {
   company: string;
   nodeLabel: string;
   role: string;
+  shortRole: string;
   period: string;
   tasks: string[];
 }
@@ -66,16 +69,28 @@ export const EDUCATION: Education[] = [
     institution: "University of Mannheim",
     period: "Current",
     grade: "1.5",
-    details: "Focus on Machine Learning and Deep Learning."
+    details: "Focus on Machine Learning and Deep Learning.",
+    courses: [
+      { name: "Machine Learning", grade: "1.3" },
+      { name: "Responsible AI", grade: "1.3" },
+      { name: "Deep Learning", grade: "tbd" }
+    ],
+    association: "Member of STADS (Student Association for Data Science and Statistics) Mannheim"
   },
   {
     id: "edu-bsc",
     degree: "Computer Science",
     nodeLabel: "B.Sc.",
-    institution: "Technische Hochschule Mannheim",
+    institution: "TH Mannheim",
     period: "Completed",
     grade: "1.3",
-    details: "Thesis (Grade 1.0): \"A comparative study of DQN vs. DDQN in a custom Pygame racing environment to mitigate Q-value overestimation bias.\""
+    details: "Thesis: \"A comparative study of DQN vs. DDQN in a custom Pygame racing environment to mitigate Q-value overestimation bias.\"",
+    courses: [
+      { name: "Software-Project: SAP BTP Software for sovanta AG (Winning Team)", grade: "1.0" },
+      { name: "Computer Vision", grade: "1.0" },
+      { name: "Graph Theory", grade: "1.0" },
+      { name: "Cross Platform Development", grade: "1.3" }
+    ]
   }
 ];
 
@@ -85,14 +100,20 @@ export const EXPERIENCE: Experience[] = [
     company: "SAP SE",
     nodeLabel: "SAP",
     role: "Working Student BTP Development",
+    shortRole: "Working Student",
     period: "04/2024 – Present",
-    tasks: ["React/JS Frontend development", "Backend integration"]
+    tasks: [
+      "Collaborated with a team of 5 interns to build SAP Demo Environment 2.0, a platform used by 20,000+ SAP Employees and Partners to showcase SAP solution demos; developing the front end with TypeScript/React and a Node.js REST API layer to organize and serve backend data.",
+      "React/JS Frontend development",
+      "Backend integration"
+    ]
   },
   {
     id: "exp-vector",
     company: "Vector Informatik",
     nodeLabel: "Vector",
     role: "Internship PREEvision Development",
+    shortRole: "Full-Time Internship",
     period: "09/2023 – 03/2024",
     tasks: ["Java Feature development for PREEvision (Full-time)"]
   },
@@ -101,6 +122,7 @@ export const EXPERIENCE: Experience[] = [
     company: "Viridium Holding AG",
     nodeLabel: "Viridium",
     role: "Working Student IT Operations",
+    shortRole: "Working Student",
     period: "09/2021 – 08/2023",
     tasks: ["2nd Level Incident Management via Ticketing Systems"]
   }
@@ -111,25 +133,12 @@ export const PROJECTS: Project[] = [
     id: "proj-klima",
     title: "Neckarstadt KliMA",
     nodeLabel: "GITHUB",
-    description: "Interactive data visualization of urban heat islands.",
+    description: "Data visualization of urban heat islands.",
     details: "An interactive data visualization project focusing on urban heat islands and the cooling effects of greenery. It was designed to make complex climate data accessible to citizens. \n\nGrundlagen der Datenvisualisierung @ TH Mannheim.",
     tech: ["Sustainability", "TypeScript", "Data Viz", "React"],
     metrics: ["Awarded the Sustainability Prize by Mannheim's Dept. of Economic Development"],
     link: "https://github.com/WanuelMirth/neckarstadt-klima",
     image: "/visual/neckarstadt-klima.png"
-  },
-  {
-    id: "proj-redteam",
-    title: "Trojan Horses in Recruiting: A Red-Teaming Case Study on Indirect Prompt Injection in Standard vs. Reasoning Models",
-    displayTitle: "Trojan Horses in Recruiting",
-    nodeLabel: "PAPER",
-    description: "arXiv paper on Indirect Prompt Injection.",
-    details: "This research investigates the security implications of Indirect Prompt Injection (IPI) within automated HR pipelines. By comparing standard instruction-tuned models with reasoning-enhanced models (Qwen 3 30B), the study uncovers a critical trade-off: while Reasoning Models are more effective at rationalizing adversarial commands through 'unfaithful reasoning,' they exhibit a unique failure mode termed 'Meta-Cognitive Leakage'.\n\nKey Discovery: Meta-Cognitive Leakage occurs when the intense cognitive load of processing complex, illogical adversarial instructions causes the model's internal instruction logic to 'bleed' into the final output (e.g., explicitly stating that a weakness was 'reframed as' a strength). This makes high-capability models paradoxically more detectable by humans in complex attack scenarios compared to standard models which resort to brittle hallucinations.",
-    tech: ["AI Security", "Failure Mode", "Red-Teaming", "LLMs", "Reasoning Models"],
-    metrics: ["New Failure Mode Identified", "Preprint available on arXiv"],
-    link: "https://arxiv.org/abs/2602.18514",
-    pdf: "/visual/paper.pdf",
-    image: "/visual/trojan-horse.png"
   },
   {
     id: "proj-bikereg",
@@ -145,10 +154,23 @@ export const PROJECTS: Project[] = [
     slides: "/visual/bikereg-presentation.pdf"
   },
   {
+    id: "proj-redteam",
+    title: "Trojan Horses in Recruiting: A Red-Teaming Case Study on Indirect Prompt Injection in Standard vs. Reasoning Models",
+    displayTitle: "Trojan Horses in Recruiting",
+    nodeLabel: "PAPER",
+    description: "arXiv paper on Indirect Prompt Injection.",
+    details: "This research investigates the security implications of Indirect Prompt Injection (IPI) within automated HR pipelines. By comparing standard instruction-tuned models with reasoning-enhanced models (Qwen 3 30B), the study uncovers a critical trade-off: while Reasoning Models are more effective at rationalizing adversarial commands through 'unfaithful reasoning,' they exhibit a unique failure mode termed 'Meta-Cognitive Leakage'.\n\nKey Discovery: Meta-Cognitive Leakage occurs when the intense cognitive load of processing complex, illogical adversarial instructions causes the model's internal instruction logic to 'bleed' into the final output (e.g., explicitly stating that a weakness was 'reframed as' a strength). This makes high-capability models paradoxically more detectable by humans in complex attack scenarios compared to standard models which resort to brittle hallucinations.",
+    tech: ["AI Security", "Failure Mode", "Red-Teaming", "LLMs", "Reasoning Models"],
+    metrics: ["New Failure Mode Identified", "Preprint available on arXiv"],
+    link: "https://arxiv.org/abs/2602.18514",
+    pdf: "/visual/paper.pdf",
+    image: "/visual/trojan-horse.png"
+  },
+  {
     id: "proj-thesis",
     title: "Bachelor Thesis",
     nodeLabel: "GITHUB",
-    description: "DQN vs. DDQN in a custom Pygame racing environment.",
+    description: "DQN vs. DDQN in a custom game.",
     details: "Title: A comparative study of DQN vs. DDQN in a custom Pygame racing environment to mitigate Q-value overestimation bias. \n\nAnalyzed the effects of double estimation on Q-learning performance and developed a custom simulation environment.",
     tech: ["Python", "RL", "Simulation", "Pygame"],
     metrics: ["Grade: 1.0"],
@@ -158,9 +180,9 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "proj-ctf",
-    title: "CTF: Capybara Themed Flag",
+    title: "Capybara Themed Flag",
     nodeLabel: "GITHUB",
-    description: "Reverse Engineering capture the flag challenge.",
+    description: "Capture the flag challenge.",
     details: "A capture the flag challenge. Designed to test exploitation and binary analysis skills through a capybara-themed series of challenges.\n\nReverse Engineering @ TH Mannheim",
     tech: ["C", "Security", "Exploitation", "Reverse Engineering"],
     metrics: ["Grade: 1.0"],
