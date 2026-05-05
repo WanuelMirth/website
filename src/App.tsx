@@ -187,7 +187,7 @@ export default function App() {
   const renderNodeLabel = (label: string) => {
     if (label === 'GITHUB') return <Github className="w-6 h-6 md:w-8 md:h-8" />;
     if (label === 'PAPER') return <FileText className="w-6 h-6 md:w-8 md:h-8" />;
-    return <span className="text-[10px] md:text-lg font-bold font-mono">{label}</span>;
+    return <span className="flex items-center justify-center text-[10px] md:text-lg font-bold font-mono leading-none">{label}</span>;
   };
 
   return (
@@ -202,7 +202,7 @@ export default function App() {
       <div 
         className="fixed inset-0 pointer-events-none opacity-25" 
         style={{ 
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='2' cy='2' r='0.8' fill='white'/%3E%3C/svg%3E")`,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 0 L2.5 1.5 L4 2 L2.5 2.5 L2 4 L1.5 2.5 L0 2 L1.5 1.5 Z' fill='rgba(255,255,255,0.8)'/%3E%3C/svg%3E")`,
           backgroundSize: '40px 40px'
         }} 
       />
@@ -212,18 +212,13 @@ export default function App() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.03)_0%,rgba(0,0,0,1)_100%)]" />
       </div>
 
-      <div className="fixed top-20 right-20 opacity-5 pointer-events-none select-none">
-        <pre className="font-mono text-xs text-neural-blue">
-          {`y = σ(Wx + b)\nL = -Σ y_log(y_pred)\n∇W = ∂L/∂W`}
-        </pre>
-      </div>
 
       {/* Layer Navigation Indicators (Bottom) */}
       <div className="fixed bottom-12 left-1/2 -translate-x-1/2 z-50 flex items-center space-x-4 md:space-x-8">
         <button 
           onClick={prevLayer}
           disabled={activeLayer === 0}
-          className="p-1.5 md:p-2 rounded-full glass border border-white hover:bg-neural-blue/10 transition-all disabled:opacity-20 disabled:cursor-not-allowed group"
+          className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full glass border border-white hover:bg-neural-blue/10 transition-all disabled:opacity-20 disabled:cursor-not-allowed group p-0"
         >
           <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-neural-white group-hover:scale-110 transition-transform" />
         </button>
@@ -251,7 +246,7 @@ export default function App() {
         <button 
           onClick={nextLayer}
           disabled={activeLayer === 4}
-          className="p-1.5 md:p-2 rounded-full glass border border-white hover:bg-neural-blue/10 transition-all disabled:opacity-20 disabled:cursor-not-allowed group"
+          className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full glass border border-white hover:bg-neural-blue/10 transition-all disabled:opacity-20 disabled:cursor-not-allowed group p-0"
         >
           <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-neural-white group-hover:scale-110 transition-transform" />
         </button>
@@ -386,10 +381,10 @@ export default function App() {
                 />
                 <div className="grid grid-rows-2 max-w-[140px] md:max-w-sm">
                   <div className="flex items-end pb-[3px] md:pb-[6px]">
-                    <h3 className="text-white text-[12px] md:text-2xl leading-none font-bold truncate md:whitespace-normal">{edu.degree}</h3>
+                    <h3 className="text-white text-[12px] md:text-2xl leading-tight font-bold truncate md:whitespace-normal">{edu.degree}</h3>
                   </div>
                   <div className="flex items-start pt-[3px] md:pt-[6px]">
-                    <p className="text-neon-purple text-[10px] md:text-lg leading-none truncate md:whitespace-normal">{edu.institution}</p>
+                    <p className="text-neon-purple text-[10px] md:text-lg leading-tight truncate md:whitespace-normal">{edu.institution}</p>
                   </div>
                 </div>
               </div>
@@ -419,10 +414,10 @@ export default function App() {
                 />
                 <div className="grid grid-rows-2 max-w-[140px] md:max-w-sm">
                   <div className="flex items-end pb-[3px] md:pb-[6px]">
-                    <h3 className="text-white text-[12px] md:text-2xl leading-none font-bold truncate md:whitespace-normal">{exp.shortRole}</h3>
+                    <h3 className="text-white text-[12px] md:text-2xl leading-tight font-bold truncate md:whitespace-normal">{exp.shortRole}</h3>
                   </div>
                   <div className="flex items-start pt-[3px] md:pt-[6px]">
-                    <p className="text-neon-purple text-[10px] md:text-lg leading-none truncate md:whitespace-normal font-normal">{exp.period}</p>
+                    <p className="text-neon-purple text-[10px] md:text-lg leading-tight truncate md:whitespace-normal font-normal">{exp.period}</p>
                   </div>
                 </div>
               </div>
@@ -452,10 +447,10 @@ export default function App() {
                 />
                 <div className="grid grid-rows-2 max-w-[140px] md:max-w-sm">
                   <div className="flex items-end pb-[3px] md:pb-[6px]">
-                    <h3 className="text-white font-mono text-[12px] md:text-2xl leading-none font-bold truncate md:whitespace-normal">{proj.displayTitle || proj.title}</h3>
+                    <h3 className="text-white font-mono text-[12px] md:text-2xl leading-tight font-bold truncate md:whitespace-normal">{proj.displayTitle || proj.title}</h3>
                   </div>
                   <div className="flex items-start pt-[3px] md:pt-[6px]">
-                    <p className="text-neon-purple text-[10px] md:text-base leading-none line-clamp-1 truncate">{proj.description}</p>
+                    <p className="text-neon-purple text-[10px] md:text-base leading-tight line-clamp-1 truncate">{proj.description}</p>
                   </div>
                 </div>
               </div>
@@ -500,7 +495,7 @@ export default function App() {
 
       <footer className="fixed bottom-4 md:bottom-8 right-6 md:right-12 z-50 text-right pointer-events-none hidden md:block">
         <p className="text-[8px] md:text-[12px] font-mono text-white-500/60 uppercase tracking-widest">
-          Mannheim, DE | 2026-05-02
+          Mannheim, DE | 2026-05-05
         </p>
       </footer>
 
@@ -701,7 +696,7 @@ export default function App() {
                       </div>
                       <div className="text-center md:text-left">
                         <h2 className="text-4xl font-bold text-white font-mono tracking-tighter mb-2 uppercase">{selectedItem.name}</h2>
-                        <p className="text-neon-purple font-mono text-lg mb-4 uppercase">{selectedItem.role}</p>
+                        <p className="text-neon-purple font-mono text-lg mb-4">{selectedItem.role}</p>
                         <div className="flex items-center justify-center md:justify-start gap-4 text-gray-400 text-sm font-mono">
                           <div className="flex items-center gap-1.5">
                             <MapPin size={14} />

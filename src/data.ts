@@ -104,8 +104,7 @@ export const EXPERIENCE: Experience[] = [
     period: "04/2024 – Present",
     tasks: [
       "Collaborated with a team of 5 interns to build SAP Demo Environment 2.0, a platform used by 20,000+ SAP Employees and Partners to showcase SAP solution demos; developing the front end with TypeScript/React and a Node.js REST API layer to organize and serve backend data.",
-      "React/JS Frontend development",
-      "Backend integration"
+      "Architected a localization Proof of Concept for the SAP Demo Environment 2.0 to automate multilingual support for the platform; developing a custom Node.js service and Redis cache to integrate SAP Translation Hub via a pipeline that linearizes nested JSON for bulk processing and restores the original data structure post-translation."
     ]
   },
   {
@@ -115,7 +114,9 @@ export const EXPERIENCE: Experience[] = [
     role: "Internship PREEvision Development",
     shortRole: "Full-Time Internship",
     period: "09/2023 – 03/2024",
-    tasks: ["Java Feature development for PREEvision (Full-time)"]
+    tasks: ["Engineered a custom parameterized testing engine using Java annotations and JUnit5 extensions; developing logic to automate test execution across ranges of AUTOSAR versions, significantly reducing code redundancy while maintaining unique test contexts per iteration.",
+    "Integrated into a Scrum-based development team to evolve PREEvision, a vehicle engineering tool with a codebase exceeding 3 million lines of code; executing rigorous peer reviews via Fisheye and Crucible to resolve identified software issues; and successfully deploying new testing features to the release branch following a multi-stage merge process and automated validation via Jenkins."
+    ]
   },
   {
     id: "exp-viridium",
@@ -124,7 +125,9 @@ export const EXPERIENCE: Experience[] = [
     role: "Working Student IT Operations",
     shortRole: "Working Student",
     period: "09/2021 – 08/2023",
-    tasks: ["2nd Level Incident Management via Ticketing Systems"]
+    tasks: ["Optimized IT service continuity by resolving and dispatching 1st and 2nd level incidents through a centralized ticketing system, supporting the operational infrastructure of a financial group managing 4 million insurance contracts.",
+      "Administered enterprise-wide Active Directory permissions and security groups to ensure granular access control and data security within a high-stakes environment."
+    ]
   }
 ];
 

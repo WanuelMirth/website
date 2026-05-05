@@ -81,13 +81,13 @@ export const NetworkNode: React.FC<NetworkNodeProps> = ({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       className={cn(
-        "relative flex flex-col items-center justify-center w-[110px] h-[110px] rounded-full border-2 glass",
+        "relative flex items-center justify-center w-[110px] h-[110px] rounded-full border-2 glass",
         typeConfig[type],
         isActive && "shadow-[0_0_30px_rgba(59,130,246,0.4)] border-white text-white",
         className
       )}
     >
-      <div className="flex items-center justify-center w-full h-full">
+      <div className="flex items-center justify-center w-full h-full pointer-events-none">
         {label}
       </div>
     </motion.div>
