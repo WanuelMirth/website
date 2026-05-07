@@ -121,7 +121,26 @@ export default function App() {
       const now = Date.now();
       if (now - lastScrollTime.current < scrollCooldown) return;
 
-      if (Math.abs(e.deltaY) > 20) {
+      // Support both vertical (deltaY) and horizontal (deltaX) scrolling
+      // This enables MacBook trackpad horizontal swipes
+      const dx = Math.abs(e.deltaX);
+      const dy = Math.abs(e.deltaY);
+
+      if (dx > dy && dx > 20) {
+        // Horizontal scroll is dominant
+        if (e.deltaX > 0) {
+          if (activeLayer < 4) {
+            nextLayer();
+            lastScrollTime.current = now;
+          }
+        } else {
+          if (activeLayer > 0) {
+            prevLayer();
+            lastScrollTime.current = now;
+          }
+        }
+      } else if (dy > 20) {
+        // Vertical scroll is dominant
         if (e.deltaY > 0) {
           if (activeLayer < 4) {
             nextLayer();
@@ -358,14 +377,14 @@ export default function App() {
               onPositionUpdate={updateNodePosition}
               onMouseEnter={() => setHoveredNode('input-1')}
               onMouseLeave={() => setHoveredNode(null)}
-              className="w-20 h-20 md:w-32 md:h-32 z-10"
+              className="w-20 h-20 md:w-24 md:h-24 lg:w-32 lg:h-32 z-10"
             />
           </div>
         </div>
         
         {/* LAYER 1: HIDDEN LAYER 1 (Education) */}
         <div className="w-full h-full flex items-center justify-center relative p-6 md:p-12 overflow-hidden">
-          <div className="flex flex-col gap-8 md:gap-32">
+          <div className="flex flex-col gap-8 md:gap-16 lg:gap-32">
             {EDUCATION.map((edu, index) => (
               <div key={edu.id} className="flex items-center space-x-2 md:space-x-6">
                 <NetworkNode 
@@ -377,7 +396,7 @@ export default function App() {
                   onPositionUpdate={updateNodePosition}
                   onMouseEnter={() => setHoveredNode(edu.id)}
                   onMouseLeave={() => setHoveredNode(null)}
-                  className="w-16 h-16 md:w-28 md:h-28"
+                  className="w-16 h-16 md:w-20 md:h-20 lg:w-28 lg:h-28"
                 />
                 <div className="grid grid-rows-2 max-w-[140px] md:max-w-sm">
                   <div className="flex items-end pb-[3px] md:pb-[6px]">
@@ -398,7 +417,7 @@ export default function App() {
 
         {/* LAYER 2: HIDDEN LAYER 2 (Experience) */}
         <div className="w-full h-full flex items-center justify-center relative p-6 md:p-12 overflow-hidden">
-          <div className="flex flex-col gap-8 md:gap-32">
+          <div className="flex flex-col gap-8 md:gap-16 lg:gap-32">
             {EXPERIENCE.map((exp, index) => (
               <div key={exp.id} className="flex items-center space-x-2 md:space-x-6">
                 <NetworkNode 
@@ -410,7 +429,7 @@ export default function App() {
                   onPositionUpdate={updateNodePosition}
                   onMouseEnter={() => setHoveredNode(exp.id)}
                   onMouseLeave={() => setHoveredNode(null)}
-                  className="w-16 h-16 md:w-28 md:h-28"
+                  className="w-16 h-16 md:w-20 md:h-20 lg:w-28 lg:h-28"
                 />
                 <div className="grid grid-rows-2 max-w-[140px] md:max-w-sm">
                   <div className="flex items-end pb-[3px] md:pb-[6px]">
@@ -431,7 +450,7 @@ export default function App() {
 
         {/* LAYER 3: HIDDEN LAYER 3 (Projects) */}
         <div className="w-full h-full flex items-center justify-center relative p-6 md:p-12 overflow-hidden">
-          <div className="flex flex-col gap-6 md:gap-16">
+          <div className="flex flex-col gap-6 md:gap-10 lg:gap-16">
             {PROJECTS.map((proj, index) => (
               <div key={proj.id} className="flex items-center space-x-2 md:space-x-6">
                 <NetworkNode 
@@ -443,7 +462,7 @@ export default function App() {
                   onPositionUpdate={updateNodePosition}
                   onMouseEnter={() => setHoveredNode(proj.id)}
                   onMouseLeave={() => setHoveredNode(null)}
-                  className="w-16 h-16 md:w-28 md:h-28"
+                  className="w-16 h-16 md:w-20 md:h-20 lg:w-28 lg:h-28"
                 />
                 <div className="grid grid-rows-2 max-w-[140px] md:max-w-sm">
                   <div className="flex items-end pb-[3px] md:pb-[6px]">
@@ -485,7 +504,7 @@ export default function App() {
                 onPositionUpdate={updateNodePosition}
                 onMouseEnter={() => setHoveredNode('output-inference')}
                 onMouseLeave={() => setHoveredNode(null)}
-                className="w-24 h-24 md:w-36 md:h-36 z-10 cursor-pointer"
+                className="w-24 h-24 md:w-28 md:h-28 lg:w-36 lg:h-36 z-10 cursor-pointer"
              />
 
              {/* Bottom Content removed */}
@@ -495,7 +514,7 @@ export default function App() {
 
       <footer className="fixed bottom-4 md:bottom-8 right-6 md:right-12 z-50 text-right pointer-events-none hidden md:block">
         <p className="text-[8px] md:text-[12px] font-mono text-white-500/60 uppercase tracking-widest">
-          Mannheim, DE | 2026-05-05
+          Mannheim, DE | 2026-05-07
         </p>
       </footer>
 
