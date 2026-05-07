@@ -38,6 +38,14 @@
   .text-gradient {
     @apply bg-clip-text text-transparent bg-linear-to-r from-neural-blue to-neon-purple;
   }
+
+  .min-text-\[10px\] {
+    font-size: max(10px, inherit);
+  }
+
+  .max-text-\[1\.125rem\] {
+    font-size: min(1.125rem, inherit);
+  }
 }
 
 /* Animations for SVG connections */

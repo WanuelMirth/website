@@ -204,9 +204,9 @@ export default function App() {
   };
 
   const renderNodeLabel = (label: string) => {
-    if (label === 'GITHUB') return <Github className="w-6 h-6 md:w-8 md:h-8" />;
-    if (label === 'PAPER') return <FileText className="w-6 h-6 md:w-8 md:h-8" />;
-    return <span className="flex items-center justify-center text-[10px] md:text-lg font-bold font-mono leading-none">{label}</span>;
+    if (label === 'GITHUB') return <Github className="w-[3vw] h-[3vw] md:w-[3vh] md:h-[3vh] lg:w-[3vh] lg:h-[3vh] min-w-[1.25rem] min-h-[1.25rem] max-w-[2rem] max-h-[2rem]" />;
+    if (label === 'PAPER') return <FileText className="w-[3vw] h-[3vw] md:w-[3vh] md:h-[3vh] lg:w-[3vh] lg:h-[3vh] min-w-[1.25rem] min-h-[1.25rem] max-w-[2rem] max-h-[2rem]" />;
+    return <span className="flex items-center justify-center text-[2.4vw] md:text-[1.6vh] lg:text-[1.6vh] min-text-[10px] max-text-[1.125rem] font-bold font-mono leading-none">{label}</span>;
   };
 
   return (
@@ -351,18 +351,18 @@ export default function App() {
         <div className="w-full h-full flex items-center justify-center relative p-6 md:p-12">
           <div className="relative flex flex-col items-center">
             {/* Top Content (Positioned relative to centered node) */}
-            <div className="absolute bottom-full mb-8 md:mb-12 w-[90vw] md:w-[80vw] max-w-2xl text-center">
+            <div className="absolute bottom-full mb-[4vh] md:mb-[6vh] w-[90vw] md:w-[80vw] max-w-2xl text-center">
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="inline-block px-3 py-1 rounded-full border border-neural-blue/30 bg-neural-blue/10 text-neural-blue text-[9px] md:text-[10px] font-mono mb-4 md:mb-6"
+                className="inline-block px-3 py-1 rounded-full border border-neural-blue/30 bg-neural-blue/10 text-neural-blue text-[9px] md:text-[10px] font-mono mb-2 md:mb-4"
               >
                 Portfolio
               </motion.div>
-              <h1 className="text-4xl md:text-7xl font-bold font-mono tracking-tighter text-white mb-4 uppercase">
+              <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold font-mono tracking-tighter text-white mb-2 md:mb-4 uppercase leading-none">
                 MANUEL WIRTH
               </h1>
-              <p className="text-lg md:text-xl text-gray-400 font-light leading-relaxed">
+              <p className="text-base md:text-lg lg:text-xl text-gray-400 font-light leading-relaxed">
                 M.Sc. <span className="text-neon-purple">Data Science</span> Student <br className="block md:hidden" /> @ University of Mannheim.
               </p>
             </div>
@@ -377,16 +377,16 @@ export default function App() {
               onPositionUpdate={updateNodePosition}
               onMouseEnter={() => setHoveredNode('input-1')}
               onMouseLeave={() => setHoveredNode(null)}
-              className="w-20 h-20 md:w-24 md:h-24 lg:w-32 lg:h-32 z-10"
+              className="w-[12vh] h-[12vh] min-w-[5rem] min-h-[5rem] max-w-[8rem] max-h-[8rem] z-10"
             />
           </div>
         </div>
         
         {/* LAYER 1: HIDDEN LAYER 1 (Education) */}
         <div className="w-full h-full flex items-center justify-center relative p-6 md:p-12 overflow-hidden">
-          <div className="flex flex-col gap-8 md:gap-16 lg:gap-32">
+          <div className="flex flex-col gap-16 md:gap-16 lg:gap-32">
             {EDUCATION.map((edu, index) => (
-              <div key={edu.id} className="flex items-center space-x-2 md:space-x-6">
+              <div key={edu.id} className="flex items-center space-x-[2.4vw] md:space-x-[1.3vh] lg:space-x-[1.3vh]">
                 <NetworkNode 
                   id={edu.id}
                   type="hidden"
@@ -396,30 +396,30 @@ export default function App() {
                   onPositionUpdate={updateNodePosition}
                   onMouseEnter={() => setHoveredNode(edu.id)}
                   onMouseLeave={() => setHoveredNode(null)}
-                  className="w-16 h-16 md:w-20 md:h-20 lg:w-28 lg:h-28"
+                  className="h-[4vw] w-[4vw] md:h-[9vh] md:w-[9vh] lg:h-[9vh] lg:w-[9vh] min-w-[4rem] min-h-[4rem] max-w-[7rem] max-h-[7rem]"
                 />
                 <div className="grid grid-rows-2 max-w-[140px] md:max-w-sm">
-                  <div className="flex items-end pb-[3px] md:pb-[6px]">
-                    <h3 className="text-white text-[12px] md:text-2xl leading-tight font-bold truncate md:whitespace-normal">{edu.degree}</h3>
+                  <div className="flex items-end pb-[0.4vh]">
+                    <h3 className="text-white text-[12px] md:text-[1.8vh] lg:text-[2vh] leading-tight font-bold truncate md:whitespace-normal">{edu.degree}</h3>
                   </div>
-                  <div className="flex items-start pt-[3px] md:pt-[6px]">
-                    <p className="text-neon-purple text-[10px] md:text-lg leading-tight truncate md:whitespace-normal">{edu.institution}</p>
+                  <div className="flex items-start pt-[0.4vh]">
+                    <p className="text-neon-purple text-[10px] md:text-[1.4vh] lg:text-[1.6vh] leading-tight truncate md:whitespace-normal">{edu.institution}</p>
                   </div>
                 </div>
               </div>
             ))}
           </div>
           
-          <div className="absolute top-12 left-1/2 -translate-x-1/2 text-center">
-            <span className="text-[18px] md:text-[24px] font-mono font-bold text-neon-purple/60 uppercase tracking-[0.3em] md:tracking-[0.5em]">EDUCATION</span>
+          <div className="absolute top-[4vh] left-1/2 -translate-x-1/2 text-center">
+            <span className="text-[16px] md:text-[2.5vh] font-mono font-bold text-neon-purple/60 uppercase tracking-[0.3em] md:tracking-[0.5em]">EDUCATION</span>
           </div>
         </div>
 
         {/* LAYER 2: HIDDEN LAYER 2 (Experience) */}
         <div className="w-full h-full flex items-center justify-center relative p-6 md:p-12 overflow-hidden">
-          <div className="flex flex-col gap-8 md:gap-16 lg:gap-32">
+          <div className="h-[75vh] flex flex-col justify-evenly">
             {EXPERIENCE.map((exp, index) => (
-              <div key={exp.id} className="flex items-center space-x-2 md:space-x-6">
+              <div key={exp.id} className="flex items-center space-x-[2.4vw] md:space-x-[1.3vh] lg:space-x-[1.3vh]">
                 <NetworkNode 
                   id={exp.id}
                   type="hidden"
@@ -429,30 +429,30 @@ export default function App() {
                   onPositionUpdate={updateNodePosition}
                   onMouseEnter={() => setHoveredNode(exp.id)}
                   onMouseLeave={() => setHoveredNode(null)}
-                  className="w-16 h-16 md:w-20 md:h-20 lg:w-28 lg:h-28"
+                  className="h-[4vw] w-[4vw] md:h-[9vh] md:w-[9vh] lg:h-[9vh] lg:w-[9vh] min-w-[4rem] min-h-[4rem] max-w-[7rem] max-h-[7rem]"
                 />
                 <div className="grid grid-rows-2 max-w-[140px] md:max-w-sm">
-                  <div className="flex items-end pb-[3px] md:pb-[6px]">
-                    <h3 className="text-white text-[12px] md:text-2xl leading-tight font-bold truncate md:whitespace-normal">{exp.shortRole}</h3>
+                  <div className="flex items-end pb-[0.4vh]">
+                    <h3 className="text-white text-[12px] md:text-[1.8vh] lg:text-[2vh] leading-tight font-bold truncate md:whitespace-normal">{exp.shortRole}</h3>
                   </div>
-                  <div className="flex items-start pt-[3px] md:pt-[6px]">
-                    <p className="text-neon-purple text-[10px] md:text-lg leading-tight truncate md:whitespace-normal font-normal">{exp.period}</p>
+                  <div className="flex items-start pt-[0.4vh]">
+                    <p className="text-neon-purple text-[10px] md:text-[1.4vh] lg:text-[1.6vh] leading-tight truncate md:whitespace-normal font-normal">{exp.period}</p>
                   </div>
                 </div>
               </div>
             ))}
           </div>
           
-          <div className="absolute top-12 left-1/2 -translate-x-1/2 text-center">
-            <span className="text-[18px] md:text-[24px] font-mono font-bold text-neon-purple/60 uppercase tracking-[0.3em] md:tracking-[0.5em]">WORK_EXPERIENCE</span>
+          <div className="absolute top-[4vh] left-1/2 -translate-x-1/2 text-center">
+            <span className="text-[16px] md:text-[2.5vh] font-mono font-bold text-neon-purple/60 uppercase tracking-[0.3em] md:tracking-[0.5em]">WORK_EXPERIENCE</span>
           </div>
         </div>
 
         {/* LAYER 3: HIDDEN LAYER 3 (Projects) */}
         <div className="w-full h-full flex items-center justify-center relative p-6 md:p-12 overflow-hidden">
-          <div className="flex flex-col gap-6 md:gap-10 lg:gap-16">
+          <div className="h-[75vh] flex flex-col justify-evenly">
             {PROJECTS.map((proj, index) => (
-              <div key={proj.id} className="flex items-center space-x-2 md:space-x-6">
+              <div key={proj.id} className="flex items-center space-x-[2.4vw] md:space-x-[1.3vh] lg:space-x-[1.3vh]">
                 <NetworkNode 
                   id={proj.id}
                   type="hidden"
@@ -462,22 +462,22 @@ export default function App() {
                   onPositionUpdate={updateNodePosition}
                   onMouseEnter={() => setHoveredNode(proj.id)}
                   onMouseLeave={() => setHoveredNode(null)}
-                  className="w-16 h-16 md:w-20 md:h-20 lg:w-28 lg:h-28"
+                  className="h-[4vw] w-[4vw] md:h-[9vh] md:w-[9vh] lg:h-[9vh] lg:w-[9vh] min-w-[4rem] min-h-[4rem] max-w-[7rem] max-h-[7rem]"
                 />
                 <div className="grid grid-rows-2 max-w-[140px] md:max-w-sm">
-                  <div className="flex items-end pb-[3px] md:pb-[6px]">
-                    <h3 className="text-white font-mono text-[12px] md:text-2xl leading-tight font-bold truncate md:whitespace-normal">{proj.displayTitle || proj.title}</h3>
+                  <div className="flex items-end pb-[0.4vh]">
+                    <h3 className="text-white font-mono text-[12px] md:text-[1.8vh] lg:text-[2vh] leading-tight font-bold truncate md:whitespace-normal">{proj.displayTitle || proj.title}</h3>
                   </div>
-                  <div className="flex items-start pt-[3px] md:pt-[6px]">
-                    <p className="text-neon-purple text-[10px] md:text-base leading-tight line-clamp-1 truncate">{proj.description}</p>
+                  <div className="flex items-start pt-[0.4vh]">
+                    <p className="text-neon-purple text-[1vh] md:text-[1.4vh] lg:text-[1.4vh] leading-tight line-clamp-1 truncate">{proj.description}</p>
                   </div>
                 </div>
               </div>
             ))}
           </div>
           
-          <div className="absolute top-12 left-1/2 -translate-x-1/2 text-center">
-            <span className="text-[18px] md:text-[24px] font-bold font-mono text-neon-purple/60 uppercase tracking-[0.3em] md:tracking-[0.5em]">SELECTED_PROJECTS</span>
+          <div className="absolute top-[4vh] left-1/2 -translate-x-1/2 text-center">
+            <span className="text-[16px] md:text-[2.5vh] font-bold font-mono text-neon-purple/60 uppercase tracking-[0.3em] md:tracking-[0.5em]">SELECTED_PROJECTS</span>
           </div>
         </div>
 
@@ -485,13 +485,13 @@ export default function App() {
         <div className="w-full h-full flex items-center justify-center relative p-6 md:p-12">
           <div className="relative flex flex-col items-center">
              {/* Top Content */}
-             <div className="absolute bottom-full mb-12 md:mb-16 text-center w-[90vw] md:w-[80vw]">
+             <div className="absolute bottom-full mb-[6vh] md:mb-[8vh] text-center w-[90vw] md:w-[80vw]">
                 <div className="flex justify-center mb-4 md:mb-6">
-                   <div className="w-12 h-12 md:w-20 md:h-20 rounded-full border border-purple-500/30 bg-purple-500/10 flex items-center justify-center">
-                      <div className="w-3 h-3 md:w-6 md:h-6 rounded-full bg-purple-500 shadow-[0_0_30px_rgba(168,83,244,0.8)]" />
+                   <div className="w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 rounded-full border border-purple-500/30 bg-purple-500/10 flex items-center justify-center">
+                      <div className="w-3 h-3 md:w-4 md:h-4 lg:w-6 lg:h-6 rounded-full bg-purple-500 shadow-[0_0_30px_rgba(168,83,244,0.8)]" />
                    </div>
                 </div>
-                <h2 className="text-xl md:text-3xl font-bold text-purple-400 font-mono tracking-tighter uppercase">Candidate_Fit = 0.97</h2>
+                <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-purple-400 font-mono tracking-tighter uppercase leading-none">Candidate_Fit = 0.97</h2>
              </div>
 
              {/* The Centered Node */}
@@ -504,7 +504,7 @@ export default function App() {
                 onPositionUpdate={updateNodePosition}
                 onMouseEnter={() => setHoveredNode('output-inference')}
                 onMouseLeave={() => setHoveredNode(null)}
-                className="w-24 h-24 md:w-28 md:h-28 lg:w-36 lg:h-36 z-10 cursor-pointer"
+                className="md:w-[14vh] md:h-[14vh] min-w-[6rem] min-h-[6rem] max-w-[9rem] max-h-[9rem] z-10 cursor-pointer"
              />
 
              {/* Bottom Content removed */}
